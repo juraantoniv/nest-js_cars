@@ -2,44 +2,41 @@ import {
   DeleteObjectCommand,
   PutObjectCommand,
   S3Client,
-} from "@aws-sdk/client-s3";
-import crypto from "crypto";
-import { UploadedFile } from "express-fileupload";
-import * as path from "path";
+} from '@aws-sdk/client-s3';
+import crypto from 'crypto';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+import process from 'process';
 
-import { configs } from "../configs/config";
+dotenv.config({ path: 'environments/local.env' });
 
 export enum EFileTypes {
-  User = "user",
-  Goods = "goods",
-  Bought = "bought",
+  User = 'user',
+  Goods = 'goods',
+  Bought = 'bought',
 }
 
 class S3Service {
   constructor(
     private s3Client = new S3Client({
-      region: configs.AWS_REGION,
+      region: process.env.AWS_REGION,
       credentials: {
-        accessKeyId: configs.AWS_ACCESS_KEY,
-        secretAccessKey: configs.AWS_SECRET_KEY,
+        accessKeyId: process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_KEY,
       },
     }),
   ) {}
 
-  public async uploadFile(
-    file: UploadedFile,
-    itemType: EFileTypes,
-    itemId: string,
-  ) {
+  public async uploadFile(file: any, itemType: EFileTypes, itemId: string) {
     const filePath = this.buildPath(file.name, itemType, itemId);
 
     await this.s3Client.send(
       new PutObjectCommand({
         Key: filePath,
-        Bucket: configs.AWS_BUCKED,
+        Bucket: process.env.AWS_BUCKED,
         Body: file.data,
         ContentType: file.mimetype,
-        ACL: "public-read",
+        ACL: 'public-read',
       }),
     );
 
@@ -50,7 +47,7 @@ class S3Service {
     await this.s3Client.send(
       new DeleteObjectCommand({
         Key: fileKey,
-        Bucket: configs.AWS_BUCKED,
+        Bucket: process.env.AWS_BUCKED,
       }),
     );
   }
