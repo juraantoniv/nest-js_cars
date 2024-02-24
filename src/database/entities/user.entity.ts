@@ -1,8 +1,8 @@
 import { Column, Entity } from 'typeorm';
 
-import { BaseEntity } from '../../../common/entities/base.entities';
+import { BaseEntity } from '../../common/entities/base.entities';
 
-@Entity('users')
+@Entity('usersData')
 export class UserEntity extends BaseEntity {
   @Column('text', { nullable: true })
   name?: string;
@@ -15,4 +15,7 @@ export class UserEntity extends BaseEntity {
 
   @Column('int', { nullable: true })
   age: number;
+
+  @Column('text', { nullable: true })
+  city: string;
 }

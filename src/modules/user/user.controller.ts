@@ -57,11 +57,11 @@ export class UserController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return await this.userService.update(+id, updateUserDto);
+    return await this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   public async remove(@Param('id') id: string) {
-    return await this.userService.remove(+id);
+    return await this.userService.remove(id);
   }
 }
