@@ -4,6 +4,7 @@
 /build
 /environments
 /test
+package-lock.json
 
 
 # Logs
