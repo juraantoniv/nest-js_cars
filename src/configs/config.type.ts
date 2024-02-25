@@ -3,6 +3,7 @@ export type Config = {
   postgres: PostgresConfig;
   redis: RedisConfig;
   email: EmailConfig;
+  aws: AWSConfig;
 };
 
 export type AppConfig = {
@@ -29,4 +30,12 @@ export type RedisConfig = {
   port: number;
   host: string;
   password: string;
+};
+
+export type AWSConfig = {
+  asw_key: string;
+  aws_secret_key: string;
+  aws_bucket: string;
+  aws_region: string;
+  aws_url: string;
 };

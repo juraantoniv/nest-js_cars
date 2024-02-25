@@ -3,12 +3,16 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import process from 'process';
 
-dotenv.config({ path: 'environments/local.env' });
+import getConfigs from '../../../src/configs/configs';
+
+dotenv.config({ path: './environments/local.env' });
+
+const awsConfig = getConfigs().aws;
 
 export enum EFileTypes {
   User = 'user',
@@ -16,25 +20,29 @@ export enum EFileTypes {
   Bought = 'bought',
 }
 
-class S3Service {
+export class S3Service {
   constructor(
     private s3Client = new S3Client({
-      region: process.env.AWS_REGION,
+      region: awsConfig.aws_region,
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY,
-        secretAccessKey: process.env.AWS_SECRET_KEY,
+        accessKeyId: awsConfig.asw_key,
+        secretAccessKey: awsConfig.aws_secret_key,
       },
     }),
   ) {}
 
-  public async uploadFile(file: any, itemType: EFileTypes, itemId: string) {
-    const filePath = this.buildPath(file.name, itemType, itemId);
+  public async uploadFile(
+    file: Express.Multer.File,
+    itemType: EFileTypes,
+    itemId: string,
+  ) {
+    const filePath = this.buildPath(file.originalname, itemType, itemId);
 
     await this.s3Client.send(
       new PutObjectCommand({
         Key: filePath,
-        Bucket: process.env.AWS_BUCKED,
-        Body: file.data,
+        Bucket: awsConfig.aws_bucket,
+        Body: file.buffer,
         ContentType: file.mimetype,
         ACL: 'public-read',
       }),
@@ -62,5 +70,3 @@ class S3Service {
     )}`;
   }
 }
-
-export const s3Service = new S3Service();

@@ -18,4 +18,7 @@ export class UserEntity extends BaseEntity {
 
   @Column('text', { nullable: true })
   city: string;
+
+  @Column('text', { nullable: true, default: null })
+  avatar: string;
 }

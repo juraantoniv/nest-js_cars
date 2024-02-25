@@ -38,7 +38,7 @@ export class UserController {
     await this.exampleService.example(createUserDto, EEmailAction.REGISTER, {
       name: createUserDto.name,
     });
-    return await this.userService.create(createUserDto);
+    return await this.userService.create(createUserDto, file);
   }
 
   @Get()
@@ -49,7 +49,7 @@ export class UserController {
   @ApiBearerAuth()
   @Get(':id')
   public async findOne(@Param('id') id: string) {
-    return await this.userService.findOne(+id);
+    return await this.userService.findOne(id);
   }
 
   @Patch(':id')

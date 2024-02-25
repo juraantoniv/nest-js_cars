@@ -4,8 +4,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 
-import { GlobalExceptionFilter } from '../../common/exeptions/global-exception.filter';
-import { ExampleService } from '../../common/services/email.service';
+import { EFileTypes, S3Service } from '../../common/services/s3.service';
 import { UserEntity } from '../../database/entities/user.entity';
 import { CreateUserDto } from './dto/request/create-user.dto';
 import { UpdateUserDto } from './dto/request/update-user.dto';
@@ -17,13 +16,23 @@ const users = [];
 export class UserService {
   private readonly logger = new Logger(UserService.name);
 
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly s3Serv: S3Service,
+  ) {}
 
-  public async create(createUserDto: CreateUserDto) {
+  public async create(createUserDto: CreateUserDto, file: Express.Multer.File) {
     this.logger.log('Creating user with DTO:', createUserDto);
     const newUser = this.userRepository.create(createUserDto);
 
-    await this.userRepository.save(newUser);
+    const user = await this.userRepository.save(newUser);
+    const filePath = await this.s3Serv.uploadFile(
+      file,
+      EFileTypes.User,
+      user.id,
+    );
+    newUser.avatar = filePath;
+    await this.userRepository.save(user);
     return newUser;
   }
 
@@ -31,8 +40,8 @@ export class UserService {
     return await this.userRepository.find();
   }
 
-  public async findOne(id: number) {
-    return `This action returns a #${id} user`;
+  public async findOne(id: string) {
+    return await this.findUserByIdOrException(id);
   }
 
   public async update(id: string, updateUserDto: UpdateUserDto) {

@@ -20,4 +20,10 @@ export default registerAs(token, () => ({
   email_service_path: configService.get<string>(
     'src/common/email-templates/views',
   ),
+
+  aws_secret_key: configService.get<string>('AWS_SECRET_KEY'),
+  aws_key: configService.get<string>('AWS_ACCESS_KEY'),
+  aws_bucket: configService.get<string>('AWS_BUCKED'),
+  aws_region: configService.get<string>('AWS_REGION'),
+  aws_url: configService.get<string>('AWS_S3_URL'),
 }));

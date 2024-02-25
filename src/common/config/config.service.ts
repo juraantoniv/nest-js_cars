@@ -52,4 +52,19 @@ export class CustomConfigService {
   get email_service_path(): string {
     return this.configs.email_service_path;
   }
+  get aws_secret_key(): string {
+    return this.configs.aws_secret_key;
+  }
+  get aws_key(): string {
+    return this.configs.aws_key;
+  }
+  get aws_bucket(): string {
+    return this.configs.aws_bucket;
+  }
+  get aws_region(): string {
+    return this.configs.aws_region;
+  }
+  get aws_url(): string {
+    return this.configs.aws_url;
+  }
 }
