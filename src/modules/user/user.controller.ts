@@ -3,7 +3,10 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UploadedFile,
@@ -15,9 +18,12 @@ import { log } from 'console';
 
 import { EEmailAction } from '../../common/enums/email.action.enum';
 import { ExampleService } from '../../common/services/email.service';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { IUserData } from '../auth/interfaces/user-data.interface';
 import { CreateUserDto } from './dto/request/create-user.dto';
 import { UpdateUserDto } from './dto/request/update-user.dto';
-import { UserService } from './user.service';
+import { UserResponseDto } from './dto/response/user-response.dto';
+import { UserService } from './services/user.service';
 
 @ApiTags('User')
 @Controller('users')
@@ -45,6 +51,11 @@ export class UserController {
   public async findAll() {
     return await this.userService.findAll();
   }
+  @ApiBearerAuth()
+  @Get('/me')
+  public async me(@CurrentUser() userData: IUserData) {
+    return await this.userService.findOne(userData.userId);
+  }
 
   @ApiBearerAuth()
   @Get(':id')
@@ -52,16 +63,42 @@ export class UserController {
     return await this.userService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch('/update')
   public async update(
-    @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser() userData: IUserData,
+  ): Promise<UserResponseDto> {
+    return await this.userService.update(
+      userData.userId,
+      updateUserDto,
+      userData,
+    );
+  }
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  public async remove(
+    @Param('id') id: string,
+    @CurrentUser() userData: IUserData,
   ) {
-    return await this.userService.update(id, updateUserDto);
+    return await this.userService.remove(id, userData);
   }
 
-  @Delete(':id')
-  public async remove(@Param('id') id: string) {
-    return await this.userService.remove(id);
+  @ApiBearerAuth()
+  @Post(':userId/follow')
+  public async follow(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @CurrentUser() userData: IUserData,
+  ): Promise<void> {
+    await this.userService.follow(userId, userData);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiBearerAuth()
+  @Delete(':userId/follow')
+  public async unfollow(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @CurrentUser() userData: IUserData,
+  ): Promise<void> {
+    await this.userService.unfollow(userId, userData);
   }
 }

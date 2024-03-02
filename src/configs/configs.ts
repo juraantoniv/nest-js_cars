@@ -18,6 +18,7 @@ export default (): Config => ({
     host: process.env.REDIS_HOST,
     port: parseInt(process.env.REDIS_PORT) || 6379,
     password: process.env.REDIS_PASSWORD,
+    url: process.env.REDIS_URL,
   },
   email: {
     user: process.env.EMAIL_SERVICE_USER,
@@ -32,5 +33,15 @@ export default (): Config => ({
     aws_url: process.env.AWS_S3_URL,
     asw_key: process.env.AWS_ACCESS_KEY,
     aws_secret_key: process.env.AWS_SECRET_KEY,
+  },
+  token: {
+    auth_access_token_secret: process.env.AUTH_ACCESS_TOKEN_SECRET,
+    auth_access_token_expiration: parseInt(
+      process.env.AUTH_ACCESS_TOKEN_EXPIRATION,
+    ),
+    auth_refresh_token_secret: process.env.AUTH_REFRESH_TOKEN_SECRET,
+    auth_refresh_token_expiration: parseInt(
+      process.env.AUTH_REFRESH_TOKEN_EXPIRATION,
+    ),
   },
 });

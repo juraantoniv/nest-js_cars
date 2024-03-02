@@ -4,6 +4,7 @@ export type Config = {
   redis: RedisConfig;
   email: EmailConfig;
   aws: AWSConfig;
+  token: TokenConfig;
 };
 
 export type AppConfig = {
@@ -30,6 +31,7 @@ export type RedisConfig = {
   port: number;
   host: string;
   password: string;
+  url: string;
 };
 
 export type AWSConfig = {
@@ -38,4 +40,11 @@ export type AWSConfig = {
   aws_bucket: string;
   aws_region: string;
   aws_url: string;
+};
+
+export type TokenConfig = {
+  auth_access_token_secret: string;
+  auth_access_token_expiration: number;
+  auth_refresh_token_secret: string;
+  auth_refresh_token_expiration: number;
 };

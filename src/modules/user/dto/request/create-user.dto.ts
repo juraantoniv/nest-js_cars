@@ -1,4 +1,4 @@
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsEmail,
   IsInt,
@@ -14,6 +14,7 @@ export class CreateUserDto {
   @IsString()
   @Length(2, 20)
   @Transform(({ value }) => value.trim())
+  @Type(() => String)
   name: string;
 
   @IsString()
@@ -25,9 +26,9 @@ export class CreateUserDto {
   @Transform(({ value }) => value.trim())
   password: string;
 
-  // @IsInt()
+  @IsInt()
   // @Min(16)
   // @Max(99)
-  @IsString()
+  @Type(() => Number)
   age: number;
 }
