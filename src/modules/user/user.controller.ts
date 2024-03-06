@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -19,9 +20,11 @@ import { log } from 'console';
 import { EEmailAction } from '../../common/enums/email.action.enum';
 import { ExampleService } from '../../common/services/email.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { SkipAuth } from '../auth/decorators/skip-auth.decorator';
 import { IUserData } from '../auth/interfaces/user-data.interface';
 import { CreateUserDto } from './dto/request/create-user.dto';
 import { UpdateUserDto } from './dto/request/update-user.dto';
+import { UsersListRequestDto } from './dto/request/users-list.request.dto';
 import { UserResponseDto } from './dto/response/user-response.dto';
 import { UserService } from './services/user.service';
 
@@ -47,9 +50,13 @@ export class UserController {
     return await this.userService.create(createUserDto, file);
   }
 
+  @ApiBearerAuth()
   @Get()
-  public async findAll() {
-    return await this.userService.findAll();
+  public async findAll(
+    @CurrentUser() userData: IUserData,
+    @Query() query: UsersListRequestDto,
+  ) {
+    return await this.userService.findAll(query, userData);
   }
   @ApiBearerAuth()
   @Get('/me')
@@ -58,9 +65,12 @@ export class UserController {
   }
 
   @ApiBearerAuth()
-  @Get(':id')
-  public async findOne(@Param('id') id: string) {
-    return await this.userService.findOne(id);
+  @Get('followingUsers')
+  public async findOne(
+    @CurrentUser() userData: IUserData,
+    @Query() query: UsersListRequestDto,
+  ) {
+    return await this.userService.findUserByQuery(query, userData);
   }
 
   @Patch('/update')

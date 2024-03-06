@@ -18,6 +18,7 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { IUserData } from '../../auth/interfaces/user-data.interface';
 import { CreateUserDto } from '../dto/request/create-user.dto';
 import { UpdateUserDto } from '../dto/request/update-user.dto';
+import { UsersListRequestDto } from '../dto/request/users-list.request.dto';
 import { UserResponseDto } from '../dto/response/user-response.dto';
 import { UserRepository } from '../user.repository';
 import { UserMapper } from './user.mapper';
@@ -58,14 +59,26 @@ export class UserService {
     return newUser;
   }
 
-  public async findAll() {
-    return await this.userRepository.find();
+  public async findAll(query: UsersListRequestDto, userData: IUserData) {
+    try {
+      return await this.userRepository.getList(query, userData);
+    } catch (e) {
+      log(e);
+    }
   }
 
   public async findOne(id: string) {
     return await this.findUserByIdOrException(id);
   }
 
+  public async findUserByQuery(
+    query: UsersListRequestDto,
+    userData: IUserData,
+  ) {
+    const [users, total] = await this.userRepository.getUser(query, userData);
+
+    return users;
+  }
   public async update(
     id: string,
     updateUserDto: UpdateUserDto,
@@ -110,32 +123,32 @@ export class UserService {
 
   public async follow(userId: string, userData: IUserData) {
     const user = await this.findUserByIdOrException(userData.userId);
+    if (userData.userId === userId) {
+      throw new ConflictException('You cant follow yourself');
+    }
     const follow = await this.followRepository.findOneBy({
-      follower_id: userId,
-      following_id: userData.userId,
+      follower_id: userData.userId,
+      following_id: userId,
     });
     if (follow) {
       throw new ConflictException('You already follow this user');
     }
     await this.followRepository.save(
       this.followRepository.create({
-        follower_id: userId,
-        following_id: user.id,
+        follower_id: user.id,
+        following_id: userId,
       }),
     );
   }
   public async unfollow(userId: string, userData: IUserData) {
     const user = await this.findUserByIdOrException(userData.userId);
     const follow = await this.followRepository.findOneBy({
-      follower_id: userId,
-      following_id: userData.userId,
+      follower_id: user.id,
+      following_id: userId,
     });
     if (!follow) {
       throw new ConflictException("You can't unfollow this user");
     }
-    await this.followRepository.delete({
-      follower_id: user.id,
-      following_id: userId,
-    });
+    await this.followRepository.remove(follow);
   }
 }

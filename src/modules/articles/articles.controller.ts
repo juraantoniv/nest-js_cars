@@ -17,6 +17,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { IUserData } from '../auth/interfaces/user-data.interface';
 import { ArticleListRequestDto } from './dto/request/articles-list-request.dto';
 import { CreateArticleRequestDto } from './dto/request/create-acrticle.dto';
+import { CreateCommentRequestDto } from './dto/request/create-comment.request.dto';
 import { UpdateArticleRequestDto } from './dto/request/update-acrticle.dto';
 import { ArticlesService } from './services/articles.service';
 
@@ -27,8 +28,11 @@ export class ArticlesController {
 
   @ApiBearerAuth()
   @Get()
-  public async getAll(@Query() query: ArticleListRequestDto): Promise<any> {
-    return await this.articlesService.getList(query);
+  public async getAll(
+    @Query() query: ArticleListRequestDto,
+    @CurrentUser() userData: IUserData,
+  ): Promise<any> {
+    return await this.articlesService.getList(query, userData);
   }
   @ApiBearerAuth()
   @Post()
@@ -63,5 +67,31 @@ export class ArticlesController {
     @CurrentUser() userData: IUserData,
   ): Promise<void> {
     await this.articlesService.deleteArticleById(articleId, userData);
+  }
+
+  @ApiBearerAuth()
+  @Post(':articleId/comment')
+  public async commentArticle(
+    @Param('articleId', ParseUUIDPipe) articleId: string,
+    @CurrentUser() userData: IUserData,
+    @Body() body: CreateCommentRequestDto,
+  ): Promise<void> {
+    await this.articlesService.commentArticle(articleId, userData, body);
+  }
+
+  @Post(':articleId/like')
+  public async like(
+    @Param('articleId', ParseUUIDPipe) articleId: string,
+    @CurrentUser() userData: IUserData,
+  ): Promise<void> {
+    await this.articlesService.like(articleId, userData);
+  }
+
+  @Delete(':articleId/like')
+  public async dislike(
+    @Param('articleId', ParseUUIDPipe) articleId: string,
+    @CurrentUser() userData: IUserData,
+  ): Promise<void> {
+    await this.articlesService.dislike(articleId, userData);
   }
 }
