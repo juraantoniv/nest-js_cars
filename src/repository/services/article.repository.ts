@@ -17,14 +17,11 @@ export class ArticleRepository extends Repository<ArticleEntity> {
     userData: IUserData,
   ): Promise<[ArticleEntity[], number]> {
     const qb = this.createQueryBuilder('article');
-    qb.leftJoinAndSelect('article.likes', 'like', 'like.user_id = :myId');
+    qb.leftJoinAndSelect('article.comments', 'comments');
     qb.leftJoinAndSelect('article.user', 'user');
-    qb.leftJoinAndSelect(
-      'user.followings',
-      'follow',
-      'follow.follower_id = :myId',
-    );
-    log(query.search);
+    qb.leftJoinAndSelect('article.likes', 'like');
+    qb.setParameter('myId', userData.userId);
+
     if (query.search) {
       qb.andWhere(
         'CONCAT(LOWER(article.title), LOWER(article.body), LOWER(article.description)) LIKE :search',

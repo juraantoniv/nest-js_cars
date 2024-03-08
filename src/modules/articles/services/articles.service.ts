@@ -3,7 +3,9 @@ import {
   Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { InjectEntityManager } from '@nestjs/typeorm';
 import { log } from 'console';
+import { EntityManager } from 'typeorm';
 
 import { ArticleEntity } from '../../../database/entities/article.entity';
 import { CommentEntity } from '../../../database/entities/comment.entity';
@@ -23,6 +25,8 @@ export class ArticlesService {
     private readonly articleRepository: ArticleRepository,
     private readonly commentRepository: CommentRepository,
     private readonly likeRepository: LikeRepository,
+    @InjectEntityManager()
+    private readonly entityManager: EntityManager,
   ) {}
 
   public async getList(
@@ -95,12 +99,15 @@ export class ArticlesService {
     userData: IUserData,
     body: CreateCommentRequestDto,
   ) {
-    const commentEntity = this.commentRepository.create({
-      user_id: userData.userId,
-      article_id: articleId,
-      body: body.body,
+    return await this.entityManager.transaction(async (tr) => {
+      const commentRepository = tr.getRepository(CommentEntity);
+      const commentEntity = commentRepository.create({
+        user_id: userData.userId,
+        article_id: articleId,
+        body: body.body,
+      });
+      return await commentRepository.save(commentEntity);
     });
-    return await this.commentRepository.save(commentEntity);
   }
 
   public async getArticleById(articleId: string): Promise<any> {
